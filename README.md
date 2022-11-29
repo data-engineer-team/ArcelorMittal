@@ -1,8 +1,11 @@
 # ArcelorMittal Project
 
 This project is about preprocessing row data with pandas and pyspark, then create database with sqlite3
-- ***Dataset:*** ==B3_B4.txt==;  ==B5.txt==; ==CoilDataInput.xlsx==
-- ***Description:*** Convert ==*txt*== file to ==*csv*== file, ==*xlsx*== to ==csv==
+- ***Dataset:*** 
+    - B3_B4.txt  
+    - B5.txt 
+    - CoilDataInput.xlsx
+- ***Description:*** Convert *txt* file to *csv* file, *xlsx* to csv
 
 
 
