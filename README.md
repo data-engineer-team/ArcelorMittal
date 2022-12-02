@@ -40,9 +40,20 @@ The data we get from client was totally raw data in the text file, and missing l
 > **B3,4,5**
 > $$ B345Value = B345TimeBased * 0.1  $$
 
+Then we have python [function](RawData_Processing/RawData_Processing_B3B4.ipynb) to use this formula to calculate ***lengthCoordinate*** and ***B345***
+
+
+## [Data Preprocessing (Pandas)](clean-row-data/B345_seperated_csv_preprocessing_pandas.ipynb)
+Using pandas to work on some preprecessing on the data
+first step we read the csv file from row data, with formula function, we've have length and values, so at this point, we joined B34_coilId, drop columns that is not nessasery, which is also important for the model
+```python
+    df = pd.merge(df, df_coilId, on='_FileId')
+```
+![b3_with_coil](images/b3withcoil.png)
+To save ready dataframe, we write to database directly through pandas
 
 ## [Data Preprocessing (Pyspark)](clean-row-data/B345_seperated_csv_preprocessing_spark.ipynb)
-Using Pyspark to run whole processe
+Alternatively using Pyspark to run whole processe
 first import all of necessary libraries
 ```python
     import pyspark
