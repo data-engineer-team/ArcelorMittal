@@ -8,6 +8,7 @@ source*
 *.pdf
 *.mov
 *.csv
+*.db
 
 # Visual Studio Code - https://code.visualstudio.com/
 .settings/
