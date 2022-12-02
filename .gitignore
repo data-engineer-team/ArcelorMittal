@@ -1,0 +1,15 @@
+# All Webstorm files
+.idea/
+*.xml
+*.iml
+
+# Any and all PDF files, MOV files, anything in a folder sarting with "source"
+source*
+*.pdf
+*.mov
+*.csv
+*.db
+
+# Visual Studio Code - https://code.visualstudio.com/
+.settings/
+.vscode/
