@@ -13,9 +13,7 @@ This project is about preprocessing row data with pandas and pyspark, then creat
 
 Requirements for the software and other tools in order to run the whole programe
 - [Python 3.9](https://www.python.org/downloads/)
-- [Pandas](https://pandas.pydata.org/docs/getting_started/install.html)
 - [Pyspark](https://spark.apache.org/docs/latest/api/python/getting_started/install.html)
-- [Java](https://www.oracle.com/java/technologies/downloads/)
 - [Sqlite3](https://www.sqlite.org/download.html)
 
 ### Installing
@@ -32,42 +30,19 @@ same for the `pyspark` and `sqlite`
     pip install sqlite
 
 
-## [Data Preprocessing (Pandas)](clean-row-data/B345_seperated_csv_preprocessing_pandas.ipynb)
+## [Formula](RawData_Processing/RawData_Processing_B3B4.ipynb)
 
-The data we get from client was totally raw data in the text file, which we cannot directly use, so we convert `txt` file to `csv` first using pandas
+The data we get from client was totally raw data in the text file, and missing lengthCoordinate and B345_values which is necessery for the models, so here we use two formula base on information we already have from raw data
+![image info](images/columns_from_raw_B34.png)
+> **lengthCoordinate**
+> $$ lenthCoordinate = previouse lengthCoordinate +  currentSneilheid * 0.001 * 0.04$$
 
-```python
-    read_file = pd.read_csv (r'File name.txt')
-    read_file.to_csv (r'File name.csv', index=None)
-```
-Since we need **lengthCoordinate** for the model, we use this formular to get lengthCoordinate
->  $$ lenthCoordinate = previouse lengthCoordinate +  previous_sh * 0.001 * 0.04$$
-
-
-As **B3,4,5** value is also required, we use another formula to get **B3,4,5** values
+> **B3,4,5**
 > $$ B345Value = B345TimeBased * 0.1  $$
-
-Till now we have most of information we need for model, the last step is using `pandas` to join ==referenceB3_4== and ==referenceB5== data which including ***coilId***
-
-In the end, Use `pandas` to drop unnecessary columns, split dataframe B3_4 in to B3 and B4 two dataframe
-![image info](images/dataframe_pandas.png)
-Write B3, B4, B5 to csv file
-```python
-    df5.to_csv('B5.csv', index=True)
-```
-It is also possible to write to Database directly from pandas dataframe, but the priority is the database has already been built
-```python
-    for row in df5.itertuples():
-        cursor.execute('''
-            INSERT INTO Table_B5(_FileId, lengthCoordinate, B5)
-            VALUES(?,?,?)
-            ''', row)
-    connexion.commit() 
-```
 
 
 ## [Data Preprocessing (Pyspark)](clean-row-data/B345_seperated_csv_preprocessing_spark.ipynb)
-Alternatively, using Pyspark to run whole processe
+Using Pyspark to run whole processe
 first import all of necessary libraries
 ```python
     import pyspark
@@ -88,8 +63,21 @@ the sytax for `pyspark` is similar to `pandas`
     df.printSchema()
 ```
 ![image info](images/schema.png)
-Using [UDF](https://spark.apache.org/docs/3.1.3/api/python/reference/api/pyspark.sql.functions.udf.html) function from spark to run the fomula to get the `lengthCoordinate` and `values`
+
+Using **fomula** to get the `lengthCoordinate` and `values`
+
 ![image info](images/lengthCoordinate_add.png)
+
+As we see, the B3_4 are in the same dataframe, so we now need to split dataframe into B3 and B4, which we drop the column we dont need for each
+```python
+    df_B3 = df.drop('B4')
+```
+
+**CoilId** is also important for the model, so we joined coilInput file with B34 dataframe, rename the ***Rolnummer*** to ***coilId***
+```python
+    df_b34 = df_B34.join(df_coil, df_B34._FileId == df_coil_b3._FileId, how='right')
+```
+
 After having dataframe ready, with pyspark it is possible to direct send dataframe to `database.db` once you create it
 ```python
     url = "jdbc:sqlite:Database.db"
@@ -140,6 +128,29 @@ Once we create table, we INTER INTO csv files we write to from cleaned dataframe
 
 ## [Example Queries & Database Schema](Example_Queries/Example_Queries.ipynb)
 
-In this file, we provided some example queries for ml engineer to use, for example `JOIN` and `SELECT`
+In this file, we provided some example queries for ml engineer to use, 
+==for example:==
+```python
+    query2 = """
+        SELECT *
+        FROM B4_table
+        WHERE coilId = 290491
+        LIMIT 10
+        """
+    seg = 0
+    for row in cursor.execute(query2):
+            print (f"length-coordinate for segment {seg} = {row[1]}")
+            seg = seg + 1
+```
+```python
+    query3 = """ 
+        SELECT distinct coilId
+        FROM B5_table
+        LIMIT 20
+        """
+
+    for item in cursor.execute(query3):
+        print(f"coilId: {item[0]}")
+```
 
 
